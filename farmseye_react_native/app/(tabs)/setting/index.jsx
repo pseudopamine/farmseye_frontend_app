@@ -1,204 +1,262 @@
-// 라이브러리 import
-import { StyleSheet, Text, View, ScrollView, Modal, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { FontAwesome6, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
 import { api_env } from '../../../apis/envApis';
 import { getUserSubFromToken } from '../../../redux/authHelper';
-import * as SecureStore from 'expo-secure-store';
-import { Feather } from '@expo/vector-icons';
 import SearchDetail from './searchDetail';
 
-
 const SettingHome = () => {
-  const [envInfo, setEnvInfo] = useState(null); // 환경 데이터 저장
-  const [userId, setUserId] = useState(null);   // 로그인한 사용자 ID 저장
-  const [loading, setLoading] = useState(true); // 로딩 상태 저장
-  const [selectedCategory, setSelectedCategory] = useState(null); // 클릭한 항목 정보 저장 (모달용)
+  const [envInfo, setEnvInfo] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // 화면에 표시할 항목 리스트
-  const categories = [
-    { label: '온도', key: 'temperature', unit: '℃' },
-    { label: '습도', key: 'humidity', unit: '%' },
-    { label: '조도', key: 'illuminance', unit: 'lx' },
-    { label: '질소산화물', key: 'no2', unit: 'ppm' },
-    { label: '이산화탄소', key: 'co2', unit: 'ppm' },
-    { label: '암모니아', key: 'nh3', unit: 'ppm' },
-    { label: '황화수소', key: 'h2s', unit: 'ppm' },
-    { label: '톨루엔', key: 'toluene', unit: 'ppm' },
-  ];
-
-  // DB 컬럼명 매칭 테이블
-  const keyMap = {
-    temperature: { min: 'minTem', max: 'maxTem' },
-    humidity: { min: 'minHumi', max: 'maxHumi' },
-    illuminance: { min: 'minIllumi', max: 'maxIllumi' },
-    no2: { min: 'bouNo2', max: 'danNo2' },
-    co2: { min: 'bouCo2', max: 'danCo2' },
-    nh3: { min: 'bouNh3', max: 'danNh3' },
-    h2s: { min: 'bouH2s', max: 'danH2s' },
-    toluene: { min: 'bouToluene', max: 'danToluene' },
-  };
-
-  // 1) 처음 화면이 열릴 때 사용자 ID 가져오기
   useEffect(() => {
     const fetchUserId = async () => {
       const token = await SecureStore.getItemAsync('accessToken');
       if (token) {
-        setUserId(getUserSubFromToken(token)); // 토큰 해석해서 ID 저장
-      } else {
-        console.log('Access token이 없습니다.');
+        setUserId(getUserSubFromToken(token));
       }
-      setLoading(false); // 로딩 끝
+      setLoading(false);
     };
     fetchUserId();
   }, []);
 
-  // 2) 사용자 ID가 있으면 환경 데이터 조회하기
   useEffect(() => {
     if (userId) {
       api_env()
         .then(res => {
-          setEnvInfo(res.data); // 서버에서 받은 환경 데이터 저장
+          setEnvInfo(res.data);
         })
-        .catch(error => {
-          console.log('환경 데이터 에러:', error);
+        .catch(err => {
+          console.log('환경 데이터 에러:', err);
         });
-    } else if (!loading) {
-      console.log('userId 없음 - 환경 데이터 요청 안 함');
     }
-  }, [userId, loading]);
+  }, [userId]);
 
-  // 톱니바퀴 클릭했을 때 모달 열기
-  const openModal = (category) => {
-    if (!category || !category.key) {
-      console.error('잘못된 카테고리 클릭');
-      return;
+  const getLevelInfo = (min, max, level) => {
+    if (min == null || max == null) {
+      return { label: '-', color: '#ccc', range: '00~00' };
     }
-    const keys = keyMap[category.key];
-    if (!keys) {
-      console.error('keyMap 매칭 실패:', category.key);
-      return;
-    }
-    // 선택한 항목과 초기값(min/max)을 모달로 넘긴다
-    const selectedData = {
-      ...category,
-      initialMin: envInfo?.[keys.min] ?? '',
-      initialMax: envInfo?.[keys.max] ?? '',
+
+    const step = (max - min) / 4;
+    const start = min + step * (level - 1);
+    const end = min + step * level;
+
+    const labelMap = ['좋음', '보통', '주의', '위험'];
+    const colorMap = ['#3790FA', '#36C48E', '#FFD447', '#FA5A5A'];
+
+    return {
+      label: labelMap[level - 1],
+      color: colorMap[level - 1],
+      range: `${start.toFixed(1)}~${end.toFixed(1)}`
     };
-    setSelectedCategory(selectedData); // 모달 열기
   };
 
-  // 모달 닫기
-  const closeModal = () => {
-    setSelectedCategory(null);
+  const categories = useMemo(() => {
+    if (!envInfo) return [];
+    return [
+      {
+        icon: <FontAwesome6 name="temperature-half" size={28} color="crimson" />,
+        label: "온도 (°C)",
+        key: "temp",
+        min: envInfo.minTem,
+        max: envInfo.maxTem,
+      },
+      {
+        icon: <Ionicons name="water" size={28} color="deepskyblue" />,
+        label: "습도 (%)",
+        key: "humi",
+        min: envInfo.minHumi,
+        max: envInfo.maxHumi,
+      },
+      {
+        icon: <FontAwesome6 name="lightbulb" size={28} color="darkorange" />,
+        label: "조도 (lx)",
+        key: "illumi",
+        min: envInfo.minIllumi,
+        max: envInfo.maxIllumi,
+      },
+      {
+        icon: <MaterialCommunityIcons name="molecule-co2" size={28} color="black" />,
+        label: "CO₂ (ppm)",
+        key: "co2",
+        min: envInfo.bouCo2,
+        max: envInfo.danCo2,
+      },
+      {
+        icon: <MaterialCommunityIcons name="weather-hazy" size={28} color="#B22222" />,
+        label: "NO₂ (ppb)",
+        key: "no2",
+        min: envInfo.bouNo2,
+        max: envInfo.danNo2,
+      },
+      {
+        icon: <MaterialCommunityIcons name="chemical-weapon" size={28} color="#8B008B" />,
+        label: "NH₃ (ppm)",
+        key: "nh3",
+        min: envInfo.bouNh3,
+        max: envInfo.danNh3,
+      },
+      {
+        icon: <MaterialCommunityIcons name="emoticon-dead-outline" size={28} color="#2E8B57" />,
+        label: "H₂S (ppm)",
+        key: "h2s",
+        min: envInfo.bouH2s,
+        max: envInfo.danH2s,
+      },
+      {
+        icon: <MaterialCommunityIcons name="test-tube" size={28} color="#1E90FF" />,
+        label: "Toluene (ppm)",
+        key: "toluene",
+        min: envInfo.bouToluene,
+        max: envInfo.danToluene,
+      },
+    ];
+  }, [envInfo]);
+
+  const openModal = (category) => {
+    setSelectedCategory({
+      label: category.label,
+      key: category.key,
+      unit: category.label.split('(')[1]?.replace(')', '') ?? '',
+      initialMin: category.min ?? '',
+      initialMax: category.max ?? '',
+    });
   };
 
-  // 모달에서 저장했을 때 데이터 업데이트
+  const closeModal = () => setSelectedCategory(null);
+
   const handleSave = (updatedValues) => {
-    setEnvInfo(prev => ({
-      ...prev,
-      ...updatedValues, // 수정된 값만 덮어쓰기
-    }));
+    setEnvInfo(prev => ({ ...prev, ...updatedValues }));
   };
 
-  // 퍼센트 구간 표시 함수 (25%, 50%, 75%, 100%)
-  const getRangeText = (categoryKey, section) => {
-    if (!envInfo) return '00-00%'; // 데이터 없으면 00-00% 표시
-
-    const keys = keyMap[categoryKey];
-    if (!keys) return '00-00%';
-
-    const min = envInfo[keys.min];
-    const max = envInfo[keys.max];
-
-    if (min == null || max == null) return '00-00%';
-
-    const interval = (max - min) / 4;
-    const start = min + interval * (section - 1);
-    const end = min + interval * section;
-
-    return `${start.toFixed(1)}~${end.toFixed(1)}`; // 소수점 1자리로 표시
-  };
-
-  // 화면에 그리기
   return (
     <ScrollView style={styles.container}>
       {loading ? (
-        <Text>사용자 정보를 가져오는 중...</Text>
-      ) : userId ? (
-        envInfo ? (
-          <>
-            {/* 항목별로 박스 5개(항목명 + 4단계 박스) 반복 */}
-            {categories.map((category, idx) => (
-              <View key={idx} style={styles.stateBoxContainer}>
-                {/* 항목명 박스 */}
-                <View style={[styles.stateBox, { backgroundColor: '#6B7280' }]}>
-                  <Text style={styles.stateText}>{category.label}</Text>
-                </View>
+        <Text>로딩 중...</Text>
+      ) : (
+        <>
+          {categories.map((category, idx) => (
+            <View key={idx} style={styles.categoryBox}>
+              {/* 제목 */}
+              <View style={styles.titleRow}>
+                {category.icon}
+                <Text style={styles.titleText}>{category.label}</Text>
+              </View>
 
-                {/* 4단계 상태 박스 */}
-                <View style={[styles.stateBox, { backgroundColor: '#0090FF' }]}>
-                  <Text style={styles.stateText}>{getRangeText(category.key, 1)}</Text>
+              {/* 상태 4개 + 설정 */}
+              <View style={styles.statusRow}>
+                <View style={styles.statusItemGroup}>
+                  {[1, 2, 3, 4].map(level => {
+                    const info = getLevelInfo(category.min, category.max, level);
+                    return (
+                      <View key={level} style={styles.statusItem}>
+                        <Text style={styles.statusLabel}>{info.label}</Text>
+                        <Text style={styles.rangeText}>{info.range}</Text>
+                        <View style={[styles.dot, { backgroundColor: info.color }]} />
+                      </View>
+                    );
+                  })}
                 </View>
-                <View style={[styles.stateBox, { backgroundColor: '#22C55E' }]}>
-                  <Text style={styles.stateText}>{getRangeText(category.key, 2)}</Text>
-                </View>
-                <View style={[styles.stateBox, { backgroundColor: '#FACC15' }]}>
-                  <Text style={styles.stateText}>{getRangeText(category.key, 3)}</Text>
-                </View>
-                <View style={[styles.stateBox, { backgroundColor: '#EF4444' }]}>
-                  <Text style={styles.stateText}>{getRangeText(category.key, 4)}</Text>
-                </View>
-
-                {/* 설정(톱니바퀴) 버튼 */}
-                <TouchableOpacity onPress={() => openModal(category)}>
-                  <Feather name="settings" size={28} color="#666" />
+                <TouchableOpacity onPress={() => openModal(category)} style={styles.settingBox}>
+                  <Feather name="settings" size={20} color="#666" />
                 </TouchableOpacity>
               </View>
-            ))}
-           
-            {/* 모달 띄우기 */}
-            {selectedCategory && (
-              <Modal visible={true} animationType="slide" transparent={true}>
-                <SearchDetail
-                  title={`${selectedCategory.label} 설정`}
-                  initialMin={selectedCategory.initialMin}
-                  initialMax={selectedCategory.initialMax}
-                  unit={selectedCategory.unit}
-                  userId={userId}
-                  envKey={selectedCategory.key}
-                  onClose={closeModal}
-                  onSave={handleSave}
-                />
-              </Modal>
-            )}
-          </>
-        ) : (
-          <Text>환경 데이터를 가져오는 중...</Text>
-        )
-      ) : (
-        <Text>사용자 정보를 사용할 수 없습니다.</Text>
+            </View>
+          ))}
+
+          {selectedCategory && (
+            <Modal visible={true} transparent animationType="slide">
+              <SearchDetail
+                title={`${selectedCategory.label} 설정`}
+                initialMin={selectedCategory.initialMin}
+                initialMax={selectedCategory.initialMax}
+                unit={selectedCategory.unit}
+                userId={userId}
+                envKey={selectedCategory.key}
+                onClose={closeModal}
+                onSave={handleSave}
+              />
+            </Modal>
+          )}
+        </>
       )}
     </ScrollView>
   );
 };
 
-// 스타일 지정
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#f0f0f0' },
-  stateBoxContainer: {
+  container: { flex: 1, padding: 12, backgroundColor: '#f0f0f0' },
+
+  categoryBox: {
+    marginBottom: 14,
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    elevation: 2,
+  },
+
+  titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
-  stateBox: {
-    width: 70,
-    height: 60,
-    borderRadius: 8,
+
+  titleText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 8,
+  },
+
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  statusItemGroup: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+  statusItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  statusLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+
+  rangeText: {
+    fontSize: 11,
+    color: '#666',
+    marginVertical: 2,
+  },
+
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+
+  settingBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    backgroundColor: '#eaeaea',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  stateText: { color: '#fff', fontSize: 12, textAlign: 'center' },
 });
 
 export default SettingHome;

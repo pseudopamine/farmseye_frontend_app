@@ -23,7 +23,7 @@ const unitMap = {
   NH3: 'ppm',
   H2S: 'ppm',
   TOLUENE: 'ppm',
-  ILLUMI: '',
+  ILLUMI: 'ADC',
 };
 
 const labelMap = {

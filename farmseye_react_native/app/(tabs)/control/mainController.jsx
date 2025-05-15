@@ -62,12 +62,12 @@ const MainControllerScreen = () => {
   const color = (value, type) => {
     const state = eva(value, type);
     switch (state) {
-      case '좋음': return '#1E90FF';
-      case '보통': return '#FFD700';
-      case '나쁨': return '#EE0000';
-      case '매우 나쁨': return '#FF4500';
-      case '어두움': return '#808080';
-      default: return '#d3d3d3';
+      case '좋음': return '#309898';
+      case '보통': return '#FF9F00';
+      case '나쁨': return '#F4631E';
+      case '매우 나쁨': return '#CB0404';
+      case '어두움': return '#2D4059';
+      default: return '#71C9CE';
     }
   };
 

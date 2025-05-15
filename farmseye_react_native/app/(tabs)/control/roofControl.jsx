@@ -34,7 +34,7 @@ const AirqControlScreen = () => {
       const res = await axios.get('http://192.168.30.236:5000/api/rules/check');
       console.log('자동화 규칙 체크 결과:', res.data);
     } catch (err) {
-      console.error('규칙 체크 오류:', err);
+      // console.error('규칙 체크 오류:', err);
     }
   };
 
@@ -64,12 +64,12 @@ const AirqControlScreen = () => {
   const color = (value, type) => {
     const state = eva(value, type);
     switch (state) {
-      case '좋음': return '#1E90FF';
-      case '보통': return '#FFD700';
-      case '나쁨': return '#EE0000';
-      case '매우 나쁨': return '#FF4500';
-      case '어두움': return '#808080';
-      default: return '#d3d3d3';
+      case '좋음': return '#309898';
+      case '보통': return '#FF9F00';
+      case '나쁨': return '#F4631E';
+      case '매우 나쁨': return '#CB0404';
+      case '어두움': return '#2D4059';
+      default: return '#71C9CE';
     }
   };
 
@@ -154,11 +154,11 @@ const AirqControlScreen = () => {
       <Text style={styles.statusMessage}>{status}</Text>
 
       {/* 자동제어 이동 */}
-      <View style={{ marginTop: 20 }}>
-        <Button
+      <View style={{ marginHorizontal: 20, marginTop: 10 }}>
+        <Button 
           title="자동 제어 설정"
           onPress={() => setShowAutoControl(true)}
-          color="#28A745"
+          color="#309898"
         />
 
         <Modal
@@ -168,11 +168,11 @@ const AirqControlScreen = () => {
           onRequestClose={() => setShowAutoControl(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>  {/* 크기 제어를 위해 새로운 wrapper 스타일 사용 */}
+            <View style={styles.modalContainer}> 
               <ScrollView contentContainerStyle={styles.modalScrollContent}>
                 <Text style={styles.modalTitle}>자동 제어 설정</Text>
                 <AirqRuleEditorScreen />
-                <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#ff5e5e" />
+                <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#CB0404" />
               </ScrollView>
             </View>
           </View>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   tabMenu: { flexDirection: 'row', justifyContent: 'center', marginBottom: 10 },
   tabButton: { marginHorizontal: 10 },
   tabText: { fontSize: 16, marginHorizontal: 16, color: '#888' },
-  activeTab: { color: '#00C896', fontWeight: 'bold' },
+  activeTab: { color: '#309898', fontWeight: 'bold' },
   image: { width: '100%', height: 140, backgroundColor: '#eef', marginBottom: 10 },
   statusCards: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 },
   statusCard: { alignItems: 'center', backgroundColor: '#f2f2f2', padding: 14, borderRadius: 10, width: '28%' },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
   },
-  activeButton: { backgroundColor: '#00C896' },
+  activeButton: { backgroundColor: '#309898' },
   buttonText: { color: '#000', fontSize: 16 },
   statusMessage: { textAlign: 'center', marginTop: 16, color: '#333', fontSize: 14 },
   autoControl: {

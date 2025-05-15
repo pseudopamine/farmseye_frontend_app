@@ -26,24 +26,24 @@ const Stock = () => {
   const [selectedStock, setSelectedStock] = useState(null);
 
   // 페이지네이션 설정
-  const itemsPerPage = 5; // 한 페이지당 5개 보여주기
+  const itemsPerPage = 5; 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = stockInfo.slice(indexOfFirstItem, indexOfLastItem); // 현재 페이지 아이템
-  const totalPages = Math.ceil(stockInfo.length / itemsPerPage); // 전체 페이지 수
+  const currentItems = stockInfo.slice(indexOfFirstItem, indexOfLastItem); 
+  const totalPages = Math.ceil(stockInfo.length / itemsPerPage); 
 
   // 서버에서 재고 목록 가져오기
   useEffect(() => {
     api_stock()
       .then(res => {
         setStockInfo(res.data);
-        setCurrentPage(1); // 데이터 새로 가져오면 1페이지로 이동
+        setCurrentPage(1); 
       })
       .catch(error => {
         console.log(error);
         Alert.alert('불러오기 실패', '서버에 문제가 있거나 네트워크 오류입니다.');
       });
-  }, [userTrigger]); // userTrigger가 바뀔 때마다 재요청
+  }, [userTrigger]); 
 
   // 페이지 버튼 렌더링 함수
   const renderPagination = () => (
@@ -53,9 +53,9 @@ const Stock = () => {
           key={i}
           style={[
             styles.pageButton,
-            currentPage === i + 1 && styles.activePage // 현재 페이지는 색 다르게
+            currentPage === i + 1 && styles.activePage 
           ]}
-          onPress={() => setCurrentPage(i + 1)} // 페이지 이동
+          onPress={() => setCurrentPage(i + 1)} 
         >
           <Text style={currentPage === i + 1 ? styles.activeText : styles.inactiveText}>
             {i + 1}
@@ -100,12 +100,12 @@ const Stock = () => {
       {/* ------------------ 재고 목록 ------------------ */}
       <FlatList
         data={currentItems}
-        keyExtractor={item => item.stockNum.toString()} // 재고 번호를 키로
+        keyExtractor={item => item.stockNum.toString()} 
         renderItem={({ item }) => (
           <StockDetail
             stock={item}
-            setSelectedStock={setSelectedStock} // 수정할 때 필요한 데이터 넘기기
-            setModalShow={setModalShow} // 수정 모달 열기
+            setSelectedStock={setSelectedStock} 
+            setModalShow={setModalShow} 
           />
         )}
       />
@@ -119,7 +119,7 @@ const Stock = () => {
           visible={modalShow}
           onClose={() => setModalShow(false)}
           selectedStock={selectedStock}
-          setUserTrigger={setUserTrigger} // 수정 후 새로고침
+          setUserTrigger={setUserTrigger} 
         />
       )}
 
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   registerButton: {
-    backgroundColor: 'cornflowerblue',
+    backgroundColor: '#309898',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 5

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Pressable, Image, Modal, ScrollView } from 'react-native';
+import { View, Text, Button, StyleSheet, Pressable, Image, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { router } from 'expo-router';
@@ -34,7 +34,7 @@ const LuxControlScreen = () => {
       const res = await axios.get('http://192.168.30.236:5000/api/rules/check');
       console.log('자동화 규칙 체크 결과:', res.data);
     } catch (err) {
-      console.error('규칙 체크 오류:', err);
+      // console.error('규칙 체크 오류:', err);
     }
   };
 
@@ -60,9 +60,9 @@ const LuxControlScreen = () => {
   const color = (value, type) => {
     const state = eva(value, type);
     switch (state) {
-      case '좋음': return '#1E90FF';
-      case '어두움': return '#808080';
-      default: return '#d3d3d3';
+      case '좋음': return '#309898';
+      case '어두움': return '#2D4059';
+      default: return '#71C9CE';
     }
   };
 
@@ -110,43 +110,55 @@ const LuxControlScreen = () => {
       <View style={styles.card}>
         <SensorData data={sensorData} eva={eva} color={color}  filterKeys={['ILLUMI']}/>
         
-        <View style={styles.buttonRow}>
-          <Button
-            title="켜기"
-            color={ledState === 'on' ? 'green' : 'gray'}
-            onPress={() => controlLed('on')}
-          />
-          <Button
-            title="끄기"
-            color={ledState === 'off' ? 'red' : 'gray'}
-            onPress={() => controlLed('off')}
-          />
-        </View>
-        <Text style={styles.statusText}>{status}</Text>
-      </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="자동 제어 설정"
-          onPress={() => setShowAutoControl(true)}
-          color="#28A745"
-        />
-
-        <Modal
-          visible={showAutoControl}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setShowAutoControl(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>  {/* 크기 제어를 위해 새로운 wrapper 스타일 사용 */}
-              <ScrollView contentContainerStyle={styles.modalScrollContent}>
-                <Text style={styles.modalTitle}>자동 제어 설정</Text>
-                <LuxRuleEditorScreen />
-                <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#ff5e5e" />
-              </ScrollView>
-            </View>
+        <View style={styles.controlPanel}>
+          {/* 전원 */}
+          <View style={styles.controlRow}>
+            <Text style={styles.controlLabel}>전원</Text>
+            <TouchableOpacity
+              style={[
+                styles.customButton,
+                ledState === 'on' ? styles.activeOn : styles.inactive,
+              ]}
+              onPress={() => controlLed('on')}
+            >
+              <Text style={styles.buttonText}>켜기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.customButton,
+                ledState === 'off' ? styles.activeOff : styles.inactive,
+              ]}
+              onPress={() => controlLed('off')}
+            >
+              <Text style={styles.buttonText}>끄기</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
+          <Text style={styles.statusText}>{status}</Text>
+        </View>
+        <View style={{ marginTop: 20 }}>
+          <Button
+            title="자동 제어 설정"
+            onPress={() => setShowAutoControl(true)}
+            color="#309898"
+          />
+
+          <Modal
+            visible={showAutoControl}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowAutoControl(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>  
+                <ScrollView contentContainerStyle={styles.modalScrollContent}>
+                  <Text style={styles.modalTitle}>자동 제어 설정</Text>
+                  <LuxRuleEditorScreen />
+                  <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#CB0404" />
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
+        </View>
       </View>
     </View>
   )
@@ -160,13 +172,14 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: 'bold' },
   tabMenu: { flexDirection: 'row', justifyContent: 'center', marginBottom: 10 },
   tabText: { fontSize: 16, marginHorizontal: 16, color: '#888' },
-  activeTab: { color: '#00C896', fontWeight: 'bold' },
+  activeTab: { color: '#309898', fontWeight: 'bold' },
   image: { width: '100%', height: 160, resizeMode: 'contain', marginBottom: 10 },
-  card: { margin: 20, backgroundColor: '#f5f5f5', borderRadius: 16, padding: 20, alignItems: 'center' },
+  card: { marginHorizontal: 20, marginTop: 10 },
   cardTitle: { fontSize: 20, marginVertical: 8 },
   cardStatus: { fontSize: 16, color: '#00C896', marginBottom: 12 },
   buttonRow: { flexDirection: 'row', justifyContent: 'space-around', width: '100%' },
   statusText: { marginTop: 10, fontSize: 14, color: '#666' },
+  controlPanel: { marginHorizontal: 20, marginTop: 10 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -205,5 +218,35 @@ const styles = StyleSheet.create({
   
   modalScrollContent: {
     paddingBottom: 20,
+  },
+  controlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  controlLabel: {
+    fontSize: 16,
+    marginRight: 10,
+    fontWeight: 'bold',
+  },
+  customButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  activeOn: {
+    backgroundColor: '#309898',
+  },
+  activeOff: {
+    backgroundColor: '#CB0404',
+  },
+  inactive: {
+    backgroundColor: 'gray',
   },
 })

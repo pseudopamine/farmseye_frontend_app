@@ -37,21 +37,21 @@ const TempControlScreen = () => {
       const res = await axios.get('http://192.168.30.236:5000/api/rules/check');
       console.log('자동화 규칙 체크 결과:', res.data);
     } catch (err) {
-      console.error('규칙 체크 오류:', err);
+      // console.error('규칙 체크 오류:', err);
     }
   };
 
-    // 컴포넌트 마운트 시 데이터 로딩 및 주기적인 데이터 업데이트
-    useEffect(() => {
+  // 컴포넌트 마운트 시 데이터 로딩 및 주기적인 데이터 업데이트
+  useEffect(() => {
+    fetchSensorData();
+    checkRules();
+
+    const interval = setInterval(() => {
       fetchSensorData();
       checkRules();
-  
-      const interval = setInterval(() => {
-        fetchSensorData();
-        checkRules();
-      }, 5 * 60000); // 60초마다 갱신
+    }, 5 * 60000); // 60초마다 갱신
 
-      return () => clearInterval(interval);
+    return () => clearInterval(interval);
   }, []);
 
   const eva = (value, type) => {
@@ -64,12 +64,12 @@ const TempControlScreen = () => {
   const color = (value, type) => {
     const state = eva(value, type);
     switch (state) {
-      case '좋음': return '#1E90FF';
-      case '보통': return '#FFD700';
-      case '나쁨': return '#EE0000';
-      case '매우 나쁨': return '#FF4500';
-      case '어두움': return '#808080';
-      default: return '#d3d3d3';
+      case '좋음': return '#309898';
+      case '보통': return '#FF9F00';
+      case '나쁨': return '#F4631E';
+      case '매우 나쁨': return '#CB0404';
+      case '어두움': return '#2D4059';
+      default: return '#71C9CE';
     }
   };
 
@@ -150,16 +150,24 @@ const TempControlScreen = () => {
         {/* 전원 */}
         <View style={styles.controlRow}>
           <Text style={styles.controlLabel}>전원</Text>
-          <Button
-            title="켜기"
-            color={ledState === 'on' ? 'green' : 'gray'}
+          <TouchableOpacity
+            style={[
+              styles.customButton,
+              ledState === 'on' ? styles.activeOn : styles.inactive,
+            ]}
             onPress={() => controlLed('on')}
-          />
-          <Button
-            title="끄기"
-            color={ledState === 'off' ? 'red' : 'gray'}
+          >
+            <Text style={styles.buttonText}>켜기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.customButton,
+              ledState === 'off' ? styles.activeOff : styles.inactive,
+            ]}
             onPress={() => controlLed('off')}
-          />
+          >
+            <Text style={styles.buttonText}>끄기</Text>
+          </TouchableOpacity>
         </View>
 
         {/* 온도 제어 */}
@@ -205,30 +213,25 @@ const TempControlScreen = () => {
           <Button
             title="자동 제어 설정"
             onPress={() => setShowAutoControl(true)}
-            color="#28A745"
+            color="#309898"
           />
 
           <Modal
             visible={showAutoControl}
             animationType="slide"
             transparent={true}
-            onRequestClose={() => setShowAutoControl(false)}
-          >
+            onRequestClose={() => setShowAutoControl(false)}>
             <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>  {/* 크기 제어를 위해 새로운 wrapper 스타일 사용 */}
+              <View style={styles.modalContainer}> 
                 <ScrollView contentContainerStyle={styles.modalScrollContent}>
                   <Text style={styles.modalTitle}>자동 제어 설정</Text>
                   <TempRuleEditorScreen />
-                  <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#ff5e5e" />
+                  <Button title="닫기" onPress={() => setShowAutoControl(false)} color="#CB0404" />
                 </ScrollView>
               </View>
             </View>
           </Modal>
         </View>
-
-
-
-
       </View>
     </View>
   );
@@ -244,15 +247,14 @@ const styles = StyleSheet.create({
   tabMenu: { flexDirection: 'row', justifyContent: 'center', marginBottom: 10 },
   tabButton: { marginHorizontal: 10 },
   tabText: { fontSize: 16, marginHorizontal: 16, color: '#888' },
-  activeTab: { color: '#00C896', fontWeight: 'bold' },
+  activeTab: { color: '#309898', fontWeight: 'bold' },
   image: { width: '100%', height: 120, marginBottom: 10 },
   statusCards: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 },
   statusCard: { alignItems: 'center', backgroundColor: '#f5f5f5', padding: 16, borderRadius: 12, width: '40%' },
   statusTitle: { fontSize: 16, marginVertical: 8 },
   statusValue: { fontSize: 14, color: '#f00' },
   controlPanel: { marginHorizontal: 20, marginTop: 10 },
-  controlRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 12 },
-  controlLabel: { fontSize: 16, color: '#333' },
+
   tempControl: { flexDirection: 'row', alignItems: 'center' },
   tempText: { marginHorizontal: 12, fontSize: 18 },
   reservationButton: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingVertical: 14, borderBottomWidth: 1, borderColor: '#eee' },
@@ -281,6 +283,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
     textAlign: 'center',
+    color : '#121212',
   },
   modalContainer: {
     maxHeight: '80%',
@@ -297,5 +300,36 @@ const styles = StyleSheet.create({
   
   modalScrollContent: {
     paddingBottom: 20,
+  },
+  buttonText: { color: '#000', fontSize: 16 },
+  controlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  controlLabel: {
+    fontSize: 16,
+    marginRight: 10,
+    fontWeight: 'bold',
+  },
+  customButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  activeOn: {
+    backgroundColor: '#309898',
+  },
+  activeOff: {
+    backgroundColor: '#CB0404',
+  },
+  inactive: {
+    backgroundColor: 'gray',
   },
 })
