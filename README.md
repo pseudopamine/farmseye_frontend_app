@@ -27,6 +27,7 @@
 
 ## 📌메인 페이지(회원가입)
 ![Image](https://github.com/user-attachments/assets/de3d644d-e08b-4aaf-8af8-03992fe8c50a)
+![Image](https://github.com/user-attachments/assets/a5f684f1-03ea-40db-ab90-0c2127cdf41f)
 
 ## 📌메인 페이지(로그인&로그아웃)
 ![Image](https://github.com/user-attachments/assets/c044e914-c1cc-449c-a0d6-b72db7a9db06)
