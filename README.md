@@ -25,6 +25,9 @@
 - JavaScript
 - Redux
 
+## 📝Project Overview
+![Image](https://github.com/user-attachments/assets/5ed08b7f-9de9-4acf-b4f3-353dce1abae7)
+
 ## 📌메인 페이지(회원가입)
 ![Image](https://github.com/user-attachments/assets/de3d644d-e08b-4aaf-8af8-03992fe8c50a)
 
