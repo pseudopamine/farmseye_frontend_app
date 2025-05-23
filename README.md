@@ -64,8 +64,8 @@
 ![Image](https://github.com/user-attachments/assets/591c3089-7da2-4e65-86d1-282bcf6b005f)
 
 ## 💡피드백
-- [**Application으로 액츄에이터 제어하기🔗**](https://www.notion.so/250429-Application-1e53fd941ed6807087aaf5f79da7308a?pvs=4)
-- [**실시간 원격 카메라 스트리밍 기능 구현🔗**](https://www.notion.so/250423-CCTV-1de3fd941ed68070bea2d58ca5473a81?pvs=4)
-- [**24시간 잠들지 않는 자동화 제어 기능🔗**](https://www.notion.so/250507-1e63fd941ed68021b7a8efd6e2c6dc3e?pvs=4)
+- [**Application으로 액츄에이터 제어하기🔗**](https://trusted-fact-26c.notion.site/250429-Application-1e53fd941ed6807087aaf5f79da7308a?pvs=4)
+- [**실시간 원격 카메라 스트리밍 기능 구현🔗**](https://trusted-fact-26c.notion.site/250423-CCTV-1de3fd941ed68070bea2d58ca5473a81?pvs=4)
+- [**24시간 잠들지 않는 자동화 제어 기능🔗**](https://trusted-fact-26c.notion.site/250507-1e63fd941ed68021b7a8efd6e2c6dc3e?pvs=4)
 
 
